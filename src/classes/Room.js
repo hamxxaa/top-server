@@ -54,11 +54,11 @@ class Room {
         return this.ID;
     }
 
-    isPlaying(){
+    isPlaying() {
         return this.playing
     }
 
-    nonline(){
+    nonline() {
         return Object.keys(this.playersInLobby).length
     }
 
@@ -195,8 +195,6 @@ class Room {
 
     setupLobbyOwnerListeners(socket) {
         socket.on("start game", () => {
-            console.log("game started");
-            
             this.startGame()
             this.scene.events.emit("create players", this.playersInLobby)
             this.ioNameSpace.emit("game started")
@@ -209,8 +207,6 @@ class Room {
                     this.setupSocketListeners(this.playersInLobby[key].socket)
                 }
             }
-            console.log("game started");
-
         })
     }
 
