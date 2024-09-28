@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "@geckos.io/phaser-on-nodejs": "^1.2.9",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.0",
+    "phaser": "^3.80.1",
+    "socket.io": "^4.7.5"
+  },
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "name": "server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
