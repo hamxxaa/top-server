@@ -5,13 +5,12 @@ const Ball = require('../classes/Ball')
 const Direk = require('../classes/Direk')
 
 module.exports = class Game extends Phaser.Scene {
-    soundNames = ['vur1', 'vur2', 'vur3', 'vur4', 'vur5', 'vur6', 'vur7', 'vur8'];
     Bodies = Phaser.Physics.Matter.Matter.Bodies;
 
     preload() { }
     create() {
 
-        //create ball posts and scores
+        //create ball, posts and scores
         this.score1 = 0;
         this.score2 = 0
         this.ball = new Ball(this, 300, 300, 'toptop')
@@ -113,7 +112,7 @@ module.exports = class Game extends Phaser.Scene {
         this.events.on("create players", (info) => {
             for (const [key] of Object.entries(info)) {
                 if (info[key].team != "spec") {
-                    info[key].createPlayer(this,(info[key].team == 'Team A') ? 100 : 700, 20 + (Object.keys(this.players).length) * 50)
+                    info[key].createPlayer(this, (info[key].team == 'Team A') ? 100 : 700, 20 + (Object.keys(this.players).length) * 50)
                     this.players[key] = info[key].player
                     this.playersToSend[key] = { name: info[key].name, team: info[key].team, size: info[key].size, x: this.players[key].x, y: this.players[key].y }
                 }
@@ -137,13 +136,13 @@ module.exports = class Game extends Phaser.Scene {
 
     }
 
-    //apply shooting
+    // Apply shooting force to the ball
     shoot(player, ball) {
-        const direction = Phaser.Math.Angle.Between(player.x, player.y, ball.x, ball.y);
-        const power = player.power
-        const forceX = Math.cos(direction) * power;
-        const forceY = Math.sin(direction) * power;
-        var forceVector = new Phaser.Math.Vector2(forceX, forceY)
+        let direction = Phaser.Math.Angle.Between(player.x, player.y, ball.x, ball.y);
+        let power = player.power
+        let forceX = Math.cos(direction) * power;
+        let forceY = Math.sin(direction) * power;
+        let forceVector = new Phaser.Math.Vector2(forceX, forceY)
         ball.applyForce(forceVector)
     }
 }

@@ -21,6 +21,11 @@ module.exports = class ClientInfo {
         this.player = new Player(scene, x, y, this.texture, this.speed, this.power, this.size, this.key, this.team)
     }
 
+    updateTeam(team) {
+        this.team = team
+    }
+
+    //Check the request from client for updating stats
     updateStats(stat, change) {
         let valid = 0
         switch (stat) {
@@ -93,9 +98,4 @@ module.exports = class ClientInfo {
             this.socket.emit("validate stats", stat, change, this.points)
         }
     }
-
-    updateTeam(team) {
-        this.team = team
-    }
-
 }

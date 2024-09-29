@@ -14,6 +14,7 @@ module.exports = class Player extends Phaser.Physics.Matter.Image {
         this.size = size + 20;
         this.id = key;
         this.team = team;
+        this.totalInput = 0
 
         // Create player's body and reach for shooting
         const playerBody = Phaser.Physics.Matter.Matter.Bodies.circle(0, 0, this.size);
@@ -35,7 +36,7 @@ module.exports = class Player extends Phaser.Physics.Matter.Image {
         this.setAngle(270);
         this.setFrictionAir(0.015);
         this.setMass(100);
-    
+
 
 
         //position of player when starting and after goal
@@ -46,12 +47,30 @@ module.exports = class Player extends Phaser.Physics.Matter.Image {
     }
 
     update() {
+
+        // Calculate the input vector based on player's input
+        // 1 = left, 2 = right, 4 = up, 8 = down, 16 = space
+
+        if ((this.totalInput & 1) == 1) {
+            this.inputVector.x -= 1
+        }
+        if ((this.totalInput & 2) == 2) {
+            this.inputVector.x += 1
+        }
+        if ((this.totalInput & 4) == 4) {
+            this.inputVector.y -= 1
+        }
+        if ((this.totalInput & 8) == 8) {
+            this.inputVector.y += 1
+        }
+        if ((this.totalInput & 16) == 16) this.scene.events.emit("shot", this.id);
+
+        // Normalize the input vector and apply force on player
         this.inputVector.normalize();
-        //applying force on player
         if (this.inputVector.x != 0) this.thrustRight(this.inputVector.x * this.speed * 2);
         if (this.inputVector.y != 0) this.thrustBack(this.inputVector.y * this.speed * 2);
 
-        //add ball to updates to send clients if updated
+        // Add player's position to updates to send to clients if updated
         if (this.body.velocity.x !== 0) {
             this.scene.updates[this.id] = { x: this.x }
         }
@@ -64,7 +83,8 @@ module.exports = class Player extends Phaser.Physics.Matter.Image {
             }
         }
 
-        //clear vector for further inputs
+        //clear vector and input for further inputs
         this.inputVector.set(0)
+        this.totalInput = 0
     }
 }

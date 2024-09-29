@@ -9,7 +9,6 @@ class Room {
         type: Phaser.HEADLESS,
         banner: false,
         audio: false,
-        // scene: [Game],
         physics: {
             default: 'matter',
             matter: {
@@ -35,6 +34,7 @@ class Room {
         this.playing = false
     }
 
+    // Method to start the game in the room  
     startGame() {
         if (!this.game) {
             this.game = new Phaser.Game(Room.config)
@@ -46,22 +46,27 @@ class Room {
         }
     }
 
+    // Getter method to get the room name
     getRoomName() {
         return this.name;
     }
 
+    // Getter method to get the room ID
     getRoomID() {
         return this.ID;
     }
 
+    // Method to check if the game is currently playing
     isPlaying() {
         return this.playing
     }
 
+    // Number of players in the room
     nonline() {
         return Object.keys(this.playersInLobby).length
     }
 
+    // Method to add player to the room
     addPlayer(socket) {
         if (!this.game) {
             socket.join(this.ID)
@@ -76,6 +81,7 @@ class Room {
         }
     }
 
+    // Method to add the owner of the room to the room
     addOwner(socket) {
         socket.join(this.ID);
         socket.emit("owner can connect to lobby", this.ID)
@@ -84,6 +90,7 @@ class Room {
 
     }
 
+    // Method to set up listeners for the game scene
     setupSceneListeners() {
         this.scene.events.on("send updates", () => {
             if (Object.keys(this.scene.updates).length) {
@@ -115,6 +122,7 @@ class Room {
         });
     }
 
+    // Method to set up listeners for spectator sockets
     setupSpecSocketListeners(socket) {
         socket.on("disconnect", () => {
             delete this.players[socket.id];
@@ -135,27 +143,12 @@ class Room {
         )
     }
 
+    // Method to set up listeners for player sockets
     setupSocketListeners(socket) {
-        socket.on("left is down", () => {
-            this.scene.players[socket.id].inputVector.x -= 1;
-        });
-        socket.on("right is down", () => {
-            this.scene.players[socket.id].inputVector.x += 1;
-        });
-        socket.on("up is down", () => {
-            this.scene.players[socket.id].inputVector.y -= 1;
-        });
-        socket.on("down is down", () => {
-            this.scene.players[socket.id].inputVector.y += 1;
-        });
-        socket.on("shoot", () => {
-            this.scene.events.emit("shot", socket.id);
-        });
 
-        socket.on("topu kurtar", () => {
-            this.scene.ball.setPosition(100, 100);
-            this.scene.updates[this.scene.ball.body.label] = { x: 100, y: 100 };
-        });
+        socket.on("player input", (totalInput) => {
+            this.scene.players[socket.id].totalInput = totalInput
+        })
 
         socket.on("disconnect", () => {
             delete this.players[socket.id];
@@ -169,6 +162,7 @@ class Room {
 
     }
 
+    // Method to set up listeners for player lobby interactions
     setupLobbyPlayerListeners(socket) {
         socket.on("player ready", () => {
             this.playersInLobby[socket.id].ready = !this.playersInLobby[socket.id].ready
@@ -176,6 +170,7 @@ class Room {
         })
     }
 
+    // Method to set up listeners for the lobby
     setupLobbyListeners(socket) {
         socket.on("update stats", (stat, change) => {
             this.playersInLobby[socket.id].updateStats(stat, change)
@@ -193,6 +188,7 @@ class Room {
         })
     }
 
+    // Method to set up listeners for the lobby owner
     setupLobbyOwnerListeners(socket) {
         socket.on("start game", () => {
             this.startGame()

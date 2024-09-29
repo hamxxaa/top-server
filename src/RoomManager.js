@@ -6,7 +6,6 @@ class RoomManager {
         this.io = io;
         this.rooms = {};
         if (!Phaser.Math.RND || !Phaser.Math.RND.uuid) {
-            // Seed the random number generator if it's not already seeded
             Phaser.Math.RND = new Phaser.Math.RandomDataGenerator([Date.now().toString()]);
         }
     }
