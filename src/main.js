@@ -7,7 +7,6 @@ function createGame() {
         type: Phaser.HEADLESS,
         banner: false,
         audio: false,
-        // scene: [Game],
         physics: {
             default: 'matter',
             matter: {

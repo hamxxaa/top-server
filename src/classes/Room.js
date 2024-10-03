@@ -1,6 +1,7 @@
 const Phaser = require('phaser');
 const Game = require('../scenes/Game');
-const ClientInfo = require('./ClientInfo')
+const ClientInfo = require('./ClientInfo');
+const ListenerRemover = require('./ListenerRemover')
 
 class Room {
     static config = {
@@ -32,6 +33,7 @@ class Room {
         this.playersInLobby = {};
         this.lobbyToSend = {};
         this.playing = false
+        this.listenerRemover = new ListenerRemover()
     }
 
     // Method to start the game in the room  
@@ -124,6 +126,8 @@ class Room {
 
     // Method to set up listeners for spectator sockets
     setupSpecSocketListeners(socket) {
+        this.listenerRemover.removeLobbyListeners(socket);
+
         socket.on("disconnect", () => {
             delete this.players[socket.id];
             this.ioNameSpace.emit("user disconnected", socket.id);
@@ -145,6 +149,7 @@ class Room {
 
     // Method to set up listeners for player sockets
     setupSocketListeners(socket) {
+        this.listenerRemover.removeLobbyListeners(socket)
 
         socket.on("player input", (totalInput) => {
             this.scene.players[socket.id].totalInput = totalInput
@@ -159,7 +164,6 @@ class Room {
         socket.on("game started on client side", () => {
             socket.emit("draw players", this.scene.playersToSend)
         })
-
     }
 
     // Method to set up listeners for player lobby interactions
@@ -172,6 +176,8 @@ class Room {
 
     // Method to set up listeners for the lobby
     setupLobbyListeners(socket) {
+        this.listenerRemover.removeMenuListeners(socket)
+
         socket.on("update stats", (stat, change) => {
             this.playersInLobby[socket.id].updateStats(stat, change)
         })
@@ -190,7 +196,7 @@ class Room {
 
     // Method to set up listeners for the lobby owner
     setupLobbyOwnerListeners(socket) {
-        socket.on("start game", () => {
+        socket.once("start game", () => {
             this.startGame()
             this.scene.events.emit("create players", this.playersInLobby)
             this.ioNameSpace.emit("game started")
