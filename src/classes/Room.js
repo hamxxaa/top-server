@@ -22,11 +22,17 @@ class Room {
         }
     }
 
-    constructor(ID, name, owner, ioNameSpace) {
+    constructor(ID, name, maxPlayers, owner, ioNameSpace) {
         this.ID = ID;
         this.name = name;
         this.owner = owner;
-        this.players = {}
+        if (maxPlayers <= 6 && maxPlayers >= 2) {
+            this.maxPlayers = maxPlayers;
+        }
+        else {
+            this.maxPlayers = 4
+        }
+        this.players = {};
         this.game = null;
         this.scene = null;
         this.ioNameSpace = ioNameSpace;
@@ -58,6 +64,10 @@ class Room {
         return this.ID;
     }
 
+    getMaxPlayers() {
+        return this.maxPlayers
+    }
+
     // Method to check if the game is currently playing
     isPlaying() {
         return this.playing
@@ -70,7 +80,10 @@ class Room {
 
     // Method to add player to the room
     addPlayer(socket) {
-        if (!this.game) {
+        if (this.maxPlayers == this.nonline()) {
+            socket.emit("room is full")
+        }
+        else if (!this.game) {
             socket.join(this.ID)
             this.setupLobbyListeners(socket)
             this.setupLobbyPlayerListeners(socket)

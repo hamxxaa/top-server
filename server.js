@@ -26,6 +26,7 @@ io.on('connection', function (socket) {
     socket.on("create room", roomInfo => {
         roomManager.createRoom(roomInfo, socket)
     })
+
     socket.on("refresh rooms", () => { socket.emit("rooms", roomManager.activeRooms());
      })
 })

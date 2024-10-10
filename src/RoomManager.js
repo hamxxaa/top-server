@@ -12,8 +12,7 @@ class RoomManager {
 
     createRoom(roomInfo, owner) {
         let ID = Phaser.Math.RND.uuid();
-        this.rooms[ID] = new Room(ID, roomInfo.Name, owner.id, this.io.to(ID));
-        // this.rooms[roomInfo.ID].startGame();
+        this.rooms[ID] = new Room(ID, roomInfo.name, roomInfo.maxPlayers, owner.id, this.io.to(ID));
         this.rooms[ID].addOwner(owner)
     }
 
@@ -24,7 +23,8 @@ class RoomManager {
                 id: room.getRoomID(),
                 name: room.getRoomName(),
                 playing: room.isPlaying(),
-                online: room.nonline()
+                online: room.nonline(),
+                maxPlayers: room.getMaxPlayers()
             };
         }
         return roomsInfo;
