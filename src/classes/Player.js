@@ -63,7 +63,6 @@ module.exports = class Player extends Phaser.Physics.Matter.Image {
         if ((this.totalInput & 8) == 8) {
             this.inputVector.y += 1
         }
-        if ((this.totalInput & 16) == 16) this.scene.events.emit("shot", this.id);
 
         // Normalize the input vector and apply force on player
         this.inputVector.normalize();

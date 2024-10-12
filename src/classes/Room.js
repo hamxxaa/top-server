@@ -177,6 +177,10 @@ class Room {
         socket.on("game started on client side", () => {
             socket.emit("draw players", this.scene.playersToSend)
         })
+
+        socket.on("space is down",()=>{
+            this.scene.events.emit("shot", socket.id);
+        })
     }
 
     // Method to set up listeners for player lobby interactions
