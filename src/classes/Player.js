@@ -1,7 +1,7 @@
 const Phaser = require('phaser');
 
 module.exports = class Player extends Phaser.Physics.Matter.Image {
-    constructor(scene, x, y, texture, speed, power, size, key, team) {
+    constructor(scene, x, y, texture, speed, power, size, key, team, objectId) {
         super(scene.matter.world, x, y, texture);
 
         // Add player to scene
@@ -9,12 +9,13 @@ module.exports = class Player extends Phaser.Physics.Matter.Image {
 
         // Data from constructor
         this.scene = scene;
-        this.power = power * 0.01 + 0.15;
+        this.power = power * 0.0005 + 0.0075;
         this.speed = speed * 0.0004 + 0.007;
         this.size = size + 20;
         this.id = key;
         this.team = team;
-        this.totalInput = 0
+        this.totalInput = 0;
+        this.objectId = objectId;
 
         // Create player's body and reach for shooting
         const playerBody = Phaser.Physics.Matter.Matter.Bodies.circle(0, 0, this.size);
@@ -71,14 +72,14 @@ module.exports = class Player extends Phaser.Physics.Matter.Image {
 
         // Add player's position to updates to send to clients if updated
         if (this.body.velocity.x !== 0) {
-            this.scene.updates[this.id] = { x: this.x }
+            this.scene.updates[this.objectId] = { x: this.x }
         }
         if (this.body.velocity.y !== 0) {
-            if (this.scene.updates[this.id]) {
-                this.scene.updates[this.id].y = this.y;
+            if (this.scene.updates[this.objectId]) {
+                this.scene.updates[this.objectId].y = this.y;
             }
             else {
-                this.scene.updates[this.id] = { y: this.y }
+                this.scene.updates[this.objectId] = { y: this.y }
             }
         }
 

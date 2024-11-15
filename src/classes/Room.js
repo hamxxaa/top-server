@@ -23,6 +23,7 @@ class Room {
     }
 
     constructor(ID, name, maxPlayers, owner, ioNameSpace) {
+        this.mapcfg = require("../mapcfg")
         this.ID = ID;
         this.name = name;
         this.owner = owner;
@@ -38,8 +39,9 @@ class Room {
         this.ioNameSpace = ioNameSpace;
         this.playersInLobby = {};
         this.lobbyToSend = {};
-        this.playing = false
-        this.listenerRemover = new ListenerRemover()
+        this.playing = false;
+        this.listenerRemover = new ListenerRemover();
+        this.objectCounter = 1
     }
 
     // Method to start the game in the room  
@@ -114,16 +116,6 @@ class Room {
             }
         });
 
-        this.scene.events.on("update score1", score => {
-            this.ioNameSpace.emit("update score1", score);
-            this.scene.events.emit("go initial positions");
-        });
-
-        this.scene.events.on("update score2", score => {
-            this.ioNameSpace.emit("update score2", score);
-            this.scene.events.emit("go initial positions");
-        });
-
         this.scene.events.on("play shoot sounds", () => {
             this.ioNameSpace.emit("play shoot sounds on client");
         });
@@ -148,7 +140,7 @@ class Room {
         });
 
         socket.on("game started on client side", () => {
-            socket.emit("draw players", this.scene.playersToSend)
+            socket.emit("draw players", this.scene.playersToSend, null, this.mapcfg)
         })
 
         socket.on("spec info", name => {
@@ -175,10 +167,10 @@ class Room {
         });
 
         socket.on("game started on client side", () => {
-            socket.emit("draw players", this.scene.playersToSend)
+            socket.emit("draw players", this.scene.playersToSend, this.playersInLobby[socket.id].objectId, this.mapcfg)
         })
 
-        socket.on("space is down",()=>{
+        socket.on("space is down", () => {
             this.scene.events.emit("shot", socket.id);
         })
     }
@@ -200,14 +192,15 @@ class Room {
         })
         socket.on("player connected to lobby", (name) => {
             socket.emit("get lobby", this.lobbyToSend)
-            this.playersInLobby[socket.id] = new ClientInfo(socket, name)
-            this.ioNameSpace.emit("update lobby", { id: socket.id, name, team: 'spec' });
-            this.lobbyToSend[socket.id] = { name: name, team: 'spec' }
+            this.playersInLobby[socket.id] = new ClientInfo(socket, name, String(this.objectCounter))
+            this.objectCounter += 1
+            this.ioNameSpace.emit("update lobby", { id: this.playersInLobby[socket.id].objectId, name, team: 'spec' });
+            this.lobbyToSend[this.playersInLobby[socket.id].objectId] = { name: name, team: 'spec' }
         })
         socket.on("update team", (team) => {
             this.playersInLobby[socket.id].updateTeam(team)
-            this.lobbyToSend[socket.id].team = team
-            this.ioNameSpace.emit("update lobby", { id: socket.id, name: this.playersInLobby[socket.id].name, team: this.playersInLobby[socket.id].team })
+            this.lobbyToSend[this.playersInLobby[socket.id].objectId].team = team
+            this.ioNameSpace.emit("update lobby", { id: this.playersInLobby[socket.id].objectId, name: this.playersInLobby[socket.id].name, team: this.playersInLobby[socket.id].team })
         })
     }
 

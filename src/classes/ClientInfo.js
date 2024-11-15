@@ -4,21 +4,22 @@ const Player = require('./Player')
 
 module.exports = class ClientInfo {
 
-    constructor(socket, name) {
-        this.socket = socket
-        this.speed = 0
-        this.power = 0
-        this.size = 0
-        this.points = 10
-        this.key = this.socket.id
-        this.texture = 'galatasaray'
-        this.team = 'spec'
-        this.player = null
-        this.name = name
+    constructor(socket, name, objectId) {
+        this.socket = socket;
+        this.speed = 0;
+        this.power = 0;
+        this.size = 0;
+        this.points = 10;
+        this.key = this.socket.id;
+        this.texture = 'galatasaray';
+        this.team = 'spec';
+        this.player = null;
+        this.name = name;
+        this.objectId = objectId;
     }
 
     createPlayer(scene, x, y) {
-        this.player = new Player(scene, x, y, this.texture, this.speed, this.power, this.size, this.key, this.team)
+        this.player = new Player(scene, x, y, this.texture, this.speed, this.power, this.size, this.key, this.team, this.objectId)
     }
 
     updateTeam(team) {
