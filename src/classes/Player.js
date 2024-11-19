@@ -71,16 +71,16 @@ module.exports = class Player extends Phaser.Physics.Matter.Image {
         if (this.inputVector.y != 0) this.thrustBack(this.inputVector.y * this.speed * 2);
 
         // Add player's position to updates to send to clients if updated
+        const updt = {}
         if (this.body.velocity.x !== 0) {
-            this.scene.updates[this.objectId] = { x: this.x }
+            updt.x = this.x
         }
         if (this.body.velocity.y !== 0) {
-            if (this.scene.updates[this.objectId]) {
-                this.scene.updates[this.objectId].y = this.y;
-            }
-            else {
-                this.scene.updates[this.objectId] = { y: this.y }
-            }
+            updt.y = this.y
+        }
+
+        if (Object.keys(updt).length > 0) {
+            this.scene.updates[this.objectId] = updt
         }
 
         //clear vector and input for further inputs

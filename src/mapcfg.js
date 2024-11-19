@@ -7,6 +7,13 @@ module.exports = {
             radius: 10,
             density: 0.001
         },
+        {
+            id: '-20',
+            x: 500,
+            y: 300,
+            radius: 10,
+            density: 0.001
+        },
     ],
     score: [
         {
@@ -111,6 +118,23 @@ module.exports = {
                     density: 0.001
                 }
             }
-        }
+        },
+        {
+            id: '-52',
+            config:
+            {
+                type: 'rectangle',
+                x: 700,
+                y: 500,
+                width: 100,
+                height: 100,
+                fillColor: '0xfac14e',
+                options:
+                {
+                    isStatic: false,
+                    density: 0.000001
+                }
+            }
+        },
     ]
 }

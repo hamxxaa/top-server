@@ -3,6 +3,7 @@ const Phaser = require('phaser');
 const Player = require('../classes/Player')
 const Ball = require('../classes/Ball')
 const Direk = require('../classes/Direk');
+const Matter = require('matter-js');
 module.exports = class Game extends Phaser.Scene {
     Bodies = Phaser.Physics.Matter.Matter.Bodies;
 
@@ -121,6 +122,10 @@ module.exports = class Game extends Phaser.Scene {
             ball.update()
         });
 
+        this.obstacles.forEach(obstacle => {
+            this.updateObstacles(obstacle)
+        });
+
         //send updates to clients
         this.events.emit("send updates", this.updates)
     }
@@ -138,27 +143,24 @@ module.exports = class Game extends Phaser.Scene {
     //send players and ball to initial positions and set velocities to 0
     goInitialPositions() {
         for (const [key, player] of Object.entries(this.players)) {
-            player.setPosition(player.initialcords.x, player.initialcords.y)
             player.setVelocity(0, 0)
+            player.setPosition(player.initialcords.x, player.initialcords.y)
             //add players to updates so client can go to initial positions too
-            if (this.updates[player.objectId]) {
-                this.updates[player.objectId].x = player.initialcords.x;
-                this.updates[player.objectId].y = player.initialcords.y;
-            }
-            else
-                this.updates[player.objectId] = { x: player.initialcords.x, y: player.initialcords.y }
+            this.updates[player.objectId] = player.initialcords
+
         }
         this.balls.forEach(ball => {
-            ball.setPosition(ball.initialcords.x, ball.initialcords.y)
             ball.setVelocity(0, 0)
+            ball.setPosition(ball.initialcords.x, ball.initialcords.y)
             // add ball to updates so client can go to initial positions too
-            if (this.updates[ball.objectId]) {
-                this.updates[ball.objectId].x = ball.initialcords.x
-                this.updates[ball.objectId].y = ball.initialcords.y
-            }
-            else
-                this.updates[ball.objectId] = { x: ball.initialcords.x, y: ball.initialcords.y }
+            this.updates[ball.objectId] = ball.initialcords
         });
+        this.obstacles.forEach(obstacle => {
+            Matter.Body.setVelocity(obstacle, { x: 0, y: 0 });
+            Matter.Body.setPosition(obstacle, obstacle.initialcords)
+            // add obstacle to updates so client can go to initial positions too
+            this.updates[obstacle.objectId] = obstacle.initialcords
+        })
 
         //send these uptades to clients
         this.events.emit("send updates", this.updates)
@@ -186,11 +188,13 @@ module.exports = class Game extends Phaser.Scene {
 
         this.mapcfg.obstacles.forEach(obstacle => {
             this.obstacles.push(this.createShape(obstacle.config))
+            this.obstacles[this.obstacles.length - 1].objectId = obstacle.id
+            this.obstacles[this.obstacles.length - 1].initialcords = { x: obstacle.config.x, y: obstacle.config.y }
         });
     }
 
     createShape(config) {
-        const style = Object.assign({}, config, this.defaults.obstacleDefaults)
+        const style = Object.assign({}, this.defaults.obstacleDefaults, config)
         const { type, x, y, options } = style;
 
         let shape;
@@ -212,6 +216,24 @@ module.exports = class Game extends Phaser.Scene {
                 throw new Error(`Unknown shape type: ${type}`);
         }
         return shape;
+    }
+
+    updateObstacles(obstacle) {
+        const { position, velocity, angularVelocity, objectId, angle } = obstacle;
+        const updt = {}
+        if (velocity.x !== 0) {
+            updt.x = position.x
+        }
+        if (velocity.y !== 0) {
+            updt.y = position.y
+        }
+        if (angularVelocity !== 0) {
+            updt.angle = Phaser.Math.RadToDeg(angle)
+        }
+
+        if (Object.keys(updt).length > 0) {
+            this.updates[objectId] = updt
+        }
     }
 
 }

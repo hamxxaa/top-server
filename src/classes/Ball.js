@@ -10,24 +10,24 @@ module.exports = class Ball extends Phaser.Physics.Matter.Image {
         this.objectId = objectId;
         this.initialcords = { x: x, y: y }
         this.radius = radius
-        
+
         const ballBody = this.scene.Bodies.circle(0, 0, this.radius, { friction: 0, frictionAir: 0.01, restitution: 1, label: 'ball', density: density })
         this.setExistingBody(ballBody)
         this.setPosition(x, y)
 
     }
     update() {
+        const updt = {}
         // add ball to updates to send clients if updated
         if (this.body.velocity.x !== 0) {
-            this.scene.updates[this.objectId] = { x: this.x }
+            updt.x = this.x
         }
         if (this.body.velocity.y !== 0) {
-            if (this.scene.updates[this.objectIdl]) {
-                this.scene.updates[this.objectId].y = this.y;
-            }
-            else {
-                this.scene.updates[this.objectId] = { x: this.x, y: this.y }
-            }
+            updt.y = this.y
+        }
+
+        if (Object.keys(updt).length > 0) {
+            this.scene.updates[this.objectId] = updt
         }
     }
 }
